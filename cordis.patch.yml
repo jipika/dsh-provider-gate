@@ -1,0 +1,3 @@
+- insert:
+    - id: provider-gate
+      name: dsh-provider-gate
