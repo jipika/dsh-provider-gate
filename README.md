@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/icon.svg" width="72" alt="dsh-provider-gate icon">
+</div>
+
 # dsh-provider-gate
 
 供应商开关：把 DSH 里全部 provider 路由（自己手写的 + 其他插件注入的）列出来逐个禁用/启用，禁用后模型选择器不再出现该供应商，重启后清单保持。

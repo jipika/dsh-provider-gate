@@ -1,5 +1,6 @@
 {
   "name": "dsh-provider-gate",
+  "icon": "./assets/icon.svg",
   "version": "0.2.0",
   "description": "供应商开关：一键禁用/启用任意 provider 路由（含其他插件注入的），禁用后模型选择器不再出现该供应商。",
   "license": "MIT",
