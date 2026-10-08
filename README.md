@@ -14,7 +14,7 @@
 
 host 半边直接操作 `llm` 服务实例上的 `adapters` Map（LlmRuntime 的唯一注册表）：
 
-- 禁用 = 把 entry 从 Map 摘下、存进内存快照 + 落盘 `~/.dsh/state/provider-gate/disabled.json`
+- 禁用 = 把 entry 从 Map 摘下、存进内存快照 + 落盘 `~/.dsh/state/provider-gate/state.json`（0.1 时代的 `disabled.json` 只在首次加载时迁移）
 - 启用 = 从快照放回 Map
 - `listProviders()`、模型选择器目录（`modelCatalog`）、请求分发（`registration()`）都查这张 Map，所以三处行为自动一致
 - 零 patch 上游插件，官方 `llm-pi-ai` / 各注入插件完全不动
@@ -30,5 +30,6 @@ host 半边直接操作 `llm` 服务实例上的 `adapters` Map（LlmRuntime 的
 
 - **本插件的路由在网关鉴权之外**（实测 desktop 上无 token 可直接访问 `/dsh-provider-gate/*`，与 dsh-writing-style 同一挂载机制）。它只走回环（webServer prefix 通道），外网摸不到；但本机任意本地进程都能改禁用清单，介意的话不要把端口暴露出去。
 - 启动重放用 2s 轮询补摘晚注册的 provider（60s 上限），启动后头几秒被禁用的供应商可能在选择器里闪现一下，请求侧则始终拦得住。
+- **运行期补摘（0.2.1 起）**：订阅 `llm/adapters-updated`（LlmRuntime 在每次注册/释放 provider 时都会广播，payload-free），发现被禁用的 provider 又被注册回来就立刻再摘一次。典型触发 = `llm-pi-ai` 在 `loader/volatile-update`（profile 配置热更新）时调 `registration.replace(routes)` 把整套路由写回 `adapters`，那一下会把一次性摘除覆盖掉。只有真的摘到东西才广播，链上有界；离线自测见 `tests/regate.test.mjs`。
 - 禁用过程中若有会话正在用该 provider 发请求，该请求会以 `NO_ADAPTER` 报错结束（不会回退到别的 provider）。
 - 宿主大版本升级后若 `adapters` 不是 Map（结构变了），插件会报错而不是静默不工作。
